@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}历史记录 — 电影推荐系统{% endblock %}
+{% block content %}
+<h2 style="margin-bottom: 4px;">历史记录</h2>
+<div class="info-bar">
+  共 {{ pagination.total }} 条交互记录
+  {% if filter_type %}<span style="margin-left: 8px;">筛选：<span class="pill pill-{{ filter_type }}">{{ event_type_labels.get(filter_type, filter_type) }}</span> <a href="{{ url_for('auth.history_page') }}">清除</a></span>{% endif %}
+</div>
+
+<div class="card" style="margin-bottom: 16px;">
+  <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+    <span style="font-size:13px;color:#888;">按类型筛选：</span>
+    <a href="{{ url_for('auth.history_page') }}" class="btn" style="font-size:12px;padding:4px 10px;{% if not filter_type %}background:#4caf50;{% endif %}">全部</a>
+    {% for etype in ['click', 'rate', 'like', 'impression'] %}
+    <a href="{{ url_for('auth.history_page', type=etype) }}" class="btn" style="font-size:12px;padding:4px 10px;{% if filter_type==etype %}background:#4caf50;{% endif %}">{{ event_type_labels.get(etype, etype) }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  {% if events %}
+  <table>
+    <thead>
+      <tr>
+        <th>电影</th>
+        <th style="width:90px;">事件类型</th>
+        <th style="width:60px;">值</th>
+        <th style="width:160px;">时间</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in events %}
+      <tr>
+        <td><a href="{{ url_for('movie.detail', item_id=e.item_id) }}">{{ e.title }}</a></td>
+        <td><span class="pill pill-{{ e.event_type }}">{{ event_type_labels.get(e.event_type, e.event_type) }}</span></td>
+        <td class="muted">
+          {% if e.event_value is not none %}
+            {% if e.event_type == 'rate' %}{{ "%.0f"|format(e.event_value) }}分{% else %}{{ "%.0f"|format(e.event_value) }}{% endif %}
+          {% else %}-{% endif %}
+        </td>
+        <td class="muted">{{ e.ts | datetime }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="muted">暂无历史记录</div>
+  {% endif %}
+</div>
+
+{% if pagination.total_pages > 1 %}
+<div style="text-align: center; margin-top: 16px; display: flex; gap: 8px; justify-content: center; align-items: center;">
+  {% if pagination.page > 1 %}
+  <a href="{{ url_for('auth.history_page', page=pagination.page-1, type=filter_type or None) }}" class="btn">上一页</a>
+  {% endif %}
+  <span style="font-size: 13px; color: #666;">第 {{ pagination.page }} / {{ pagination.total_pages }} 页（共 {{ pagination.total }} 条）</span>
+  {% if pagination.page < pagination.total_pages %}
+  <a href="{{ url_for('auth.history_page', page=pagination.page+1, type=filter_type or None) }}" class="btn">下一页</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

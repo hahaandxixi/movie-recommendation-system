@@ -1,0 +1,12 @@
+{% macro poster(item, size_class='') %}
+<div class="poster-wrap {{ size_class }}">
+  {% if item.poster_url %}
+  <img src="{{ item.poster_url }}" alt="{{ item.title }}" loading="lazy" />
+  {% else %}
+  <div class="poster-placeholder" style="background: linear-gradient(135deg, {{ item.poster_c1 or '#607d8b' }}, {{ item.poster_c2 or '#263238' }});">
+    <div class="ph-title">{{ item.title }}</div>
+    <div class="ph-genre">{{ item.poster_label or '' }}</div>
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}

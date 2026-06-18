@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pyo
+.idea/
+*.sqlite3
+*.db
+docs/
+myidea_submission.zip
+.DS_Store

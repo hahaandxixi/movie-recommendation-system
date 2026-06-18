@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}个人资料 — 电影推荐系统{% endblock %}
+{% block content %}
+<h2 style="margin-bottom: 4px;">个人资料</h2>
+<div class="info-bar">管理您的账户信息</div>
+
+<div class="row">
+  <div class="card" style="flex: 1; max-width: 480px;">
+    <h3>基本信息</h3>
+    <table>
+      <tr><td style="width:80px;color:#888;">用户ID</td><td>{{ user.id }}</td></tr>
+      <tr><td style="color:#888;">用户名</td><td><strong>{{ user.username }}</strong></td></tr>
+      <tr><td style="color:#888;">注册时间</td><td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else '未知' }}</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="flex: 1; max-width: 480px;">
+    <h3>交互统计</h3>
+    {% if stats %}
+    <table>
+      {% for etype, cnt in stats.items() %}
+      <tr>
+        <td><span class="pill pill-{{ etype }}">{{ etype }}</span></td>
+        <td>{{ cnt }} 次</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <div class="muted">暂无交互记录</div>
+    {% endif %}
+    <div style="margin-top: 12px;">
+      <a href="{{ url_for('auth.history_page') }}" class="btn">查看完整历史记录</a>
+    </div>
+  </div>
+</div>
+
+{% if error %}
+<div style="max-width: 480px; margin-top: 16px;">
+  <div class="error">{{ error }}</div>
+</div>
+{% endif %}
+
+<div class="row">
+  <div class="card" style="flex: 1; max-width: 480px;">
+    <h3>修改用户名</h3>
+    <form method="post" action="{{ url_for('auth.profile_update_username') }}">
+      <div class="form-group">
+        <label>新用户名（至少2个字符）</label>
+        <input type="text" name="username" required minlength="2" value="{{ user.username }}" />
+      </div>
+      <button type="submit" class="btn">更新用户名</button>
+    </form>
+  </div>
+
+  <div class="card" style="flex: 1; max-width: 480px;">
+    <h3>修改密码</h3>
+    <form method="post" action="{{ url_for('auth.profile_update_password') }}">
+      <div class="form-group">
+        <label>旧密码</label>
+        <input type="password" name="old_password" required />
+      </div>
+      <div class="form-group">
+        <label>新密码（至少3个字符）</label>
+        <input type="password" name="new_password" required minlength="3" />
+      </div>
+      <div class="form-group">
+        <label>确认新密码</label>
+        <input type="password" name="new_password2" required minlength="3" />
+      </div>
+      <button type="submit" class="btn" style="background:#c62828;">更新密码</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

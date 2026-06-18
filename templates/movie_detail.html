@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% from "_macros.html" import poster %}
+{% block title %}{{ movie.title }} — 电影推荐系统{% endblock %}
+{% block content %}
+<h2 style="margin-bottom: 4px;">{{ movie.title }}</h2>
+<div class="info-bar">
+  类型：{% for g in movie.genres.split(' | ') %}<span class="tag">{{ g }}</span>{% endfor %}
+  &nbsp;|&nbsp;
+  <a href="{{ url_for('main.me') }}">返回我的推荐</a>
+</div>
+
+<div class="row">
+  <div class="card" style="min-width: 320px; max-width: 520px;">
+    <div style="display: flex; gap: 20px; align-items: flex-start;">
+      <div style="width: 140px; flex-shrink: 0;">
+        {{ poster(movie, '') }}
+      </div>
+      <div style="flex:1;">
+        <div style="font-size: 13px; color: #555; margin-bottom: 14px;">{{ movie.genres }}</div>
+        <h3>⭐ 评分（写入 MySQL）</h3>
+        <form method="post" action="{{ url_for('movie.rate', item_id=movie.movie_id) }}" id="rate-form">
+          <div class="stars" id="star-widget">
+            <input type="radio" name="rating" value="5" id="s5" />
+            <label for="s5">★</label>
+            <input type="radio" name="rating" value="4" id="s4" />
+            <label for="s4">★</label>
+            <input type="radio" name="rating" value="3" id="s3" />
+            <label for="s3">★</label>
+            <input type="radio" name="rating" value="2" id="s2" />
+            <label for="s2">★</label>
+            <input type="radio" name="rating" value="1" id="s1" />
+            <label for="s1">★</label>
+          </div>
+          <div style="height: 8px;"></div>
+          <button type="submit" class="btn">提交评分</button>
+        </form>
+        <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid #eee;">
+          <form method="post" action="{{ url_for('movie.like', item_id=movie.movie_id) }}">
+            <button type="submit" class="btn btn-like">❤️ 收藏</button>
+          </form>
+        </div>
+        <div style="height: 8px;"></div>
+        <div class="muted">点击/评分/收藏均写入 MySQL user_events 表，推荐基于最近交互更新。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📎 协同过滤相似（ItemCF）</h3>
+    {% set cf_similar = similar | selectattr("algo", "equalto", "itemcf") | list %}
+    {% if cf_similar %}
+    <table>
+      <thead><tr><th>相似电影</th><th style="width:60px;">相似度</th></tr></thead>
+      <tbody>
+        {% for s in cf_similar %}
+        <tr>
+          <td><a href="{{ url_for('movie.detail', item_id=s.movie_id) }}">{{ s.title }}</a></td>
+          <td>{{ "%.4f"|format(s.score) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="muted">暂无共现数据。</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>🏷️ 内容相似（Content-Based）</h3>
+    {% set cb_similar = similar | selectattr("algo", "equalto", "content") | list %}
+    {% if cb_similar %}
+    <table>
+      <thead><tr><th>同类电影</th><th style="width:60px;">Jaccard</th></tr></thead>
+      <tbody>
+        {% for s in cb_similar %}
+        <tr>
+          <td><a href="{{ url_for('movie.detail', item_id=s.movie_id) }}">{{ s.title }}</a></td>
+          <td>{{ "%.4f"|format(s.score) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="muted">暂无类型匹配数据。</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

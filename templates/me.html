@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "_macros.html" import poster %}
+{% block title %}我的推荐 — 电影推荐系统{% endblock %}
+{% block content %}
+<h2 style="margin-bottom: 4px;">我的推荐</h2>
+<div class="info-bar">当前用户：{{ current_username or ('#' ~ current_user_id) }}</div>
+
+<div class="row">
+  <div class="card">
+    <h3>📖 我的历史（最近 {{ history|length }} 条）</h3>
+    {% if history %}
+    <div class="movie-grid">
+      {% for h in history %}
+      <a href="{{ url_for('movie.detail', item_id=h.movie_id) }}" class="movie-card">
+        {{ poster(h) }}
+        <div class="movie-title">{{ h.title }}</div>
+        <div class="movie-score">{{ "%.1f"|format(h.rating) }}</div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="muted">暂无历史记录。</div>
+    {% endif %}
+    <div style="height: 10px;"></div>
+    <div class="muted">系统会记录你的曝光/点击/评分/收藏，用于随时间更新推荐列表；如需查看明细，请到 <a href="{{ url_for('auth.history_page') }}">历史记录</a>。</div>
+  </div>
+</div>
+
+<div style="display:flex; align-items:center; justify-content: space-between; gap: 12px; margin: 16px 0 8px;">
+  <h3>🎯 综合推荐</h3>
+  <a class="btn" href="{{ url_for('main.me', seed=refresh_token) }}" style="font-size:12px;padding:6px 12px;background:#4caf50;">换一批</a>
+</div>
+<div class="card">
+  {% if recs %}
+  <div class="movie-grid-fixed5">
+    {% for r in recs %}
+    <a href="{{ url_for('movie.detail', item_id=r.movie_id) }}" class="movie-card movie-card-fixed">
+      {{ poster(r) }}
+      <div class="movie-title" style="font-size:12px;">{{ r.title }}</div>
+      <div class="muted" style="font-size:11px;">
+        <span class="tag">
+          {% if r.algo == 'itemcf' %}协同过滤{% elif r.algo == 'content' %}内容相似{% elif r.algo == 'usercf' %}用户协同{% elif r.algo == 'tag' %}标签偏好{% else %}热门{% endif %}
+        </span>
+        {{ r.reason|truncate(22, True, "…") }}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="muted">暂无推荐结果</div>
+  {% endif %}
+</div>
+{% endblock %}

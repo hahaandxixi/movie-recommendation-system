@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_macros.html" import poster %}
+{% block title %}首页 — 电影推荐系统{% endblock %}
+{% block content %}
+<h2 style="margin-bottom: 4px;">电影推荐系统</h2>
+<div class="info-bar">数据源：MovieLens 1M（movies.dat / ratings.dat / users.dat）&nbsp;|&nbsp;数据库：MySQL（myidea_recommend）</div>
+
+<div class="row">
+  <div class="card" style="flex: 2;">
+    <h3>🔥 热门榜</h3>
+    {% if popular %}
+    <div class="movie-grid-fixed5">
+      {% for it in popular %}
+      <a href="{{ url_for('movie.detail', item_id=it.movie_id) }}" class="movie-card movie-card-fixed">
+        {{ poster(it) }}
+        <div class="movie-title">{{ it.title }}</div>
+        <div class="movie-score">{{ "%.1f"|format(it.score) }}</div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="muted">暂无数据。</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div style="text-align: center;">
+    {% if not current_user_id %}
+    <a href="{{ url_for('auth.login_page') }}" class="btn">登录</a>
+    <span style="margin: 0 6px; color: #888;">或</span>
+    <a href="{{ url_for('auth.register_page') }}" class="btn" style="background: #4caf50;">注册</a>
+    {% else %}
+    <a href="{{ url_for('main.me') }}" class="btn">进入我的推荐</a>
+    {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

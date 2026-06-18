@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}电影推荐系统{% endblock %}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial; background: #f5f5f5; color: #333; }
+    nav { background: #1a1a2e; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 20px; }
+    nav a { color: #e0e0e0; text-decoration: none; font-size: 14px; }
+    nav a:hover { color: #fff; }
+    nav .brand { font-size: 18px; font-weight: 700; color: #fff; }
+    nav .spacer { flex: 1; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .row { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    .card { background: #fff; border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; min-width: 320px; flex: 1; }
+    .card h3 { margin-bottom: 12px; font-size: 16px; color: #1a1a2e; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px 6px; text-align: left; font-size: 14px; }
+    .muted { color: #888; font-size: 12px; }
+    .btn { display: inline-block; padding: 8px 18px; background: #1a1a2e; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .btn:hover { background: #16213e; }
+    input[type=text],input[type=password],input[type=number] { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; width: 100%; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; margin-bottom: 4px; font-size: 13px; color: #555; }
+    .error { color: #d32f2f; font-size: 13px; margin-bottom: 8px; }
+    .info-bar { font-size: 13px; color: #666; margin-bottom: 16px; }
+    .tag { display: inline-block; padding: 2px 8px; background: #e8eaf6; border-radius: 999px; font-size: 12px; margin-right: 4px; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; margin-right: 4px; font-weight: 600; }
+    .pill-impression { background: #e3f2fd; color: #1565c0; }
+    .pill-click { background: #fff3e0; color: #e65100; }
+    .pill-rate { background: #e8f5e9; color: #2e7d32; }
+    .pill-like { background: #fce4ec; color: #c62828; }
+    .stars { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 4px; }
+    .stars input { display: none; }
+    .stars label { font-size: 32px; color: #ddd; cursor: pointer; transition: color 0.2s; }
+    .stars input:checked ~ label { color: #f5a623; }
+    .stars label:hover,
+    .stars label:hover ~ label { color: #f5a623; }
+    .btn-like { background: #c62828; }
+    .btn-like:hover { background: #b71c1c; }
+    .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+    .movie-card { text-decoration: none; color: #333; display: block; transition: transform 0.15s; }
+    .movie-card:hover { transform: translateY(-3px); }
+    .movie-grid-fixed5 { display: grid; grid-template-columns: repeat(5, 140px); gap: 16px; overflow-x: auto; padding-bottom: 6px; }
+    .movie-card-fixed { width: 140px; }
+    .poster-wrap { width: 100%; height: 0; padding-bottom: 150%; border-radius: 8px; overflow: hidden; background: #e0e0e0; position: relative; }
+    .poster-wrap img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .poster-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; text-align: center; padding: 8px; }
+    .poster-placeholder .ph-title { font-size: 13px; font-weight: 600; line-height: 1.3; max-height: 3.9em; overflow: hidden; }
+    .poster-placeholder .ph-genre { font-size: 10px; opacity: 0.75; margin-top: 6px; }
+    .movie-title { font-size: 13px; font-weight: 600; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .movie-score { font-size: 12px; color: #888; }
+    .flash-msg { padding: 10px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 4px; }
+    .flash-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .flash-error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="{{ url_for('main.index') }}" class="brand">🎬 电影推荐系统</a>
+    <a href="{{ url_for('main.index') }}">首页</a>
+    {% if current_user_id %}
+    <a href="{{ url_for('main.me') }}">我的推荐</a>
+    <a href="{{ url_for('auth.history_page') }}">历史记录</a>
+    <span class="spacer"></span>
+    <a href="{{ url_for('auth.profile_page') }}" style="font-size: 13px;">{{ current_username or ('用户#' ~ current_user_id) }}</a>
+    <a href="{{ url_for('auth.logout') }}">退出</a>
+    {% else %}
+    <span class="spacer"></span>
+    <a href="{{ url_for('auth.login_page') }}">登录</a>
+    <a href="{{ url_for('auth.register_page') }}">注册</a>
+    {% endif %}
+  </nav>
+  <div class="container">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+    <div style="margin-bottom: 12px;">
+      {% for category, msg in msgs %}
+      <div class="flash-msg flash-{{ category }}">{{ msg }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
