@@ -39,6 +39,9 @@
     .stars label:hover ~ label { color: #f5a623; }
     .btn-like { background: #c62828; }
     .btn-like:hover { background: #b71c1c; }
+    .nav-form { display: inline; }
+    .nav-button { color: #e0e0e0; background: none; border: 0; cursor: pointer; font: inherit; font-size: 14px; }
+    .nav-button:hover { color: #fff; }
     .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
     .movie-card { text-decoration: none; color: #333; display: block; transition: transform 0.15s; }
     .movie-card:hover { transform: translateY(-3px); }
@@ -65,7 +68,10 @@
     <a href="{{ url_for('auth.history_page') }}">历史记录</a>
     <span class="spacer"></span>
     <a href="{{ url_for('auth.profile_page') }}" style="font-size: 13px;">{{ current_username or ('用户#' ~ current_user_id) }}</a>
-    <a href="{{ url_for('auth.logout') }}">退出</a>
+    <form class="nav-form" method="post" action="{{ url_for('auth.logout') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button class="nav-button" type="submit">退出</button>
+    </form>
     {% else %}
     <span class="spacer"></span>
     <a href="{{ url_for('auth.login_page') }}">登录</a>

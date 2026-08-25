@@ -91,9 +91,10 @@ def download_missing_for_ids(movie_ids: list[int]) -> tuple[int, int]:
 
 def _urlopen(url, timeout=20):
     req = urllib.request.Request(url, headers=HEADERS)
-    resp = urllib.request.urlopen(req, timeout=timeout)
-    if resp.headers.get("Content-Encoding") == "gzip":
-        content = gzip.decompress(content)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        content = resp.read()
+        if resp.headers.get("Content-Encoding") == "gzip":
+            content = gzip.decompress(content)
     return content
 
 
