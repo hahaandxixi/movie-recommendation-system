@@ -19,6 +19,7 @@
         <div style="font-size: 13px; color: #555; margin-bottom: 14px;">{{ movie.genres }}</div>
         <h3>⭐ 评分（写入 MySQL）</h3>
         <form method="post" action="{{ url_for('movie.rate', item_id=movie.movie_id) }}" id="rate-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <div class="stars" id="star-widget">
             <input type="radio" name="rating" value="5" id="s5" />
             <label for="s5">★</label>
@@ -36,6 +37,7 @@
         </form>
         <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid #eee;">
           <form method="post" action="{{ url_for('movie.like', item_id=movie.movie_id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <button type="submit" class="btn btn-like">❤️ 收藏</button>
           </form>
         </div>

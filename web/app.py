@@ -4,9 +4,11 @@ import logging
 import os
 import sys
 import threading
+from datetime import timedelta
 from pathlib import Path
 
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
 
 from myidea.config import DATASET_DIR, SECRET_KEY
 
@@ -19,6 +21,7 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s - %(message)s",
 )
 logger = logging.getLogger("myidea.web.app")
+csrf = CSRFProtect()
 
 
 def create_app() -> Flask:
@@ -29,7 +32,13 @@ def create_app() -> Flask:
         static_folder=str(MYIDEA_DIR / "static"),
         static_url_path="/static",
     )
-    app.config["SECRET_KEY"] = SECRET_KEY
+    app.config.update(
+        SECRET_KEY=SECRET_KEY,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
+    )
+    csrf.init_app(app)
     # 开发/演示时经常改页面：关掉缓存，避免“我改了但网页没变”的情况
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
@@ -56,8 +65,8 @@ def _init_mysql(app: Flask) -> None:
         raise RuntimeError(
             "MySQL 连接失败，请确认：\n"
             "  1) MySQL 服务已启动\n"
-            "  2) 默认连接 root@127.0.0.1:3306（密码 123456）\n"
-            "  3) 可通过环境变量覆盖：MYIDEA_MYSQL_HOST / MYIDEA_MYSQL_PORT / MYIDEA_MYSQL_USER / MYIDEA_MYSQL_PASSWORD / MYIDEA_MYSQL_DATABASE\n"
+            "  2) 已复制 .env.example 为 .env 并填写数据库密码\n"
+            "  3) 也可通过 MYIDEA_MYSQL_* 环境变量覆盖连接配置\n"
             f"  原始错误: {exc}"
         ) from exc
 
@@ -109,6 +118,9 @@ def _register_blueprints(app: Flask) -> None:
         # 禁用缓存：每次都拿到最新页面（对开发/演示更友好）
         if not (response.direct_passthrough or response.status_code in {301, 302, 304}):
             response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         return response
 
     @app.template_filter("datetime")

@@ -8,17 +8,18 @@
     <div class="error">{{ error }}</div>
     {% endif %}
     <form method="post" action="{{ url_for('auth.register_submit') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <div class="form-group">
         <label>用户名（至少2个字符）</label>
         <input type="text" name="username" required />
       </div>
       <div class="form-group">
-        <label>密码（至少3个字符）</label>
-        <input type="password" name="password" required />
+        <label>密码（至少8个字符）</label>
+        <input type="password" name="password" required minlength="8" />
       </div>
       <div class="form-group">
         <label>确认密码</label>
-        <input type="password" name="password2" required />
+        <input type="password" name="password2" required minlength="8" />
       </div>
       <button type="submit" class="btn">注册</button>
     </form>

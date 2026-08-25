@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+from urllib.parse import urlsplit
+
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 
 from myidea.services.interaction_service import log_event
 from myidea.services.recommendation_service import RecommendationService
 
 movie_bp = Blueprint("movie", __name__, url_prefix="/movie")
+
+
+def _is_safe_local_path(target: str) -> bool:
+    """只允许站内相对路径，拒绝 //example.com 形式的开放重定向。"""
+    parsed = urlsplit(target)
+    return target.startswith("/") and not target.startswith("//") and not parsed.netloc
 
 
 def _get_current_user() -> int | None:
@@ -73,7 +81,7 @@ def rate(item_id: int):
     log_event(user_id=user_id, item_id=item_id, event_type="rate", event_value=rating)
     flash(f"已评分 {int(rating)} 分！", "success")
     next_url = (request.form.get("next") or "").strip()
-    if next_url.startswith("/"):
+    if _is_safe_local_path(next_url):
         return redirect(next_url)
     return redirect(url_for("movie.detail", item_id=item_id))
 
@@ -93,7 +101,7 @@ def like(item_id: int):
     log_event(user_id=user_id, item_id=item_id, event_type="like", event_value=5.0)
     flash("已收藏！", "success")
     next_url = (request.form.get("next") or "").strip()
-    if next_url.startswith("/"):
+    if _is_safe_local_path(next_url):
         return redirect(next_url)
     return redirect(url_for("movie.detail", item_id=item_id))
 

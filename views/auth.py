@@ -53,6 +53,7 @@ def login_submit():
     if user is None:
         return render_template("login.html", error="用户名或密码错误")
 
+    session.clear()
     session["user_id"] = user.id
     session["username"] = user.username
     return redirect(url_for("main.me"))
@@ -76,8 +77,8 @@ def register_submit():
         error = "用户名至少2个字符"
     elif not username.isalnum() and not all(c.isalnum() or c in "_-" for c in username):
         error = "用户名只能包含字母、数字、下划线和连字符"
-    elif len(password) < 3:
-        error = "密码至少3个字符"
+    elif len(password) < 8:
+        error = "密码至少8个字符"
     elif password != password2:
         error = "两次密码不一致"
 
@@ -88,12 +89,13 @@ def register_submit():
     if user is None:
         return render_template("register.html", error="用户名已存在或注册失败")
 
+    session.clear()
     session["user_id"] = user.id
     session["username"] = user.username
     return redirect(url_for("main.me"))
 
 
-@auth_bp.get("/logout")
+@auth_bp.post("/logout")
 def logout():
     session.clear()
     return redirect(url_for("main.index"))
@@ -154,8 +156,8 @@ def profile_update_password():
     error = None
     if not old_password:
         error = "请输入旧密码"
-    elif len(new_password) < 3:
-        error = "新密码至少3个字符"
+    elif len(new_password) < 8:
+        error = "新密码至少8个字符"
     elif new_password != new_password2:
         error = "两次新密码不一致"
 

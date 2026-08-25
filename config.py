@@ -1,19 +1,26 @@
 from __future__ import annotations
 
 import os
+import secrets
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
+load_dotenv(BASE_DIR / ".env")
+
 DATASET_DIR = BASE_DIR / "数据集" / "MovieLens" / "ml-1m" / "ml-1m"
 ITEMCF_SIM_CACHE_PATH = BASE_DIR / "models" / "itemcf_sim.pkl"
 
-SECRET_KEY = os.environ.get("MYIDEA_SECRET_KEY", "myidea-course-design-2026")
+# 未配置时使用进程级随机密钥，避免把可预测的密钥提交到公开仓库。
+# 正式部署必须通过 .env 或环境变量提供固定值，否则重启后现有会话会失效。
+SECRET_KEY = os.environ.get("MYIDEA_SECRET_KEY") or secrets.token_hex(32)
 
 MYSQL_HOST = os.environ.get("MYIDEA_MYSQL_HOST", "127.0.0.1")
 MYSQL_PORT = int(os.environ.get("MYIDEA_MYSQL_PORT", "3306"))
 MYSQL_USER = os.environ.get("MYIDEA_MYSQL_USER", "root")
-MYSQL_PASSWORD = os.environ.get("MYIDEA_MYSQL_PASSWORD", "123456")
+MYSQL_PASSWORD = os.environ.get("MYIDEA_MYSQL_PASSWORD", "")
 MYSQL_DATABASE = os.environ.get("MYIDEA_MYSQL_DATABASE", "myidea_recommend")
 MYSQL_CHARSET = "utf8mb4"
 

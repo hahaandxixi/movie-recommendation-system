@@ -44,6 +44,7 @@
   <div class="card" style="flex: 1; max-width: 480px;">
     <h3>修改用户名</h3>
     <form method="post" action="{{ url_for('auth.profile_update_username') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <div class="form-group">
         <label>新用户名（至少2个字符）</label>
         <input type="text" name="username" required minlength="2" value="{{ user.username }}" />
@@ -55,17 +56,18 @@
   <div class="card" style="flex: 1; max-width: 480px;">
     <h3>修改密码</h3>
     <form method="post" action="{{ url_for('auth.profile_update_password') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <div class="form-group">
         <label>旧密码</label>
         <input type="password" name="old_password" required />
       </div>
       <div class="form-group">
-        <label>新密码（至少3个字符）</label>
-        <input type="password" name="new_password" required minlength="3" />
+        <label>新密码（至少8个字符）</label>
+        <input type="password" name="new_password" required minlength="8" />
       </div>
       <div class="form-group">
         <label>确认新密码</label>
-        <input type="password" name="new_password2" required minlength="3" />
+        <input type="password" name="new_password2" required minlength="8" />
       </div>
       <button type="submit" class="btn" style="background:#c62828;">更新密码</button>
     </form>
